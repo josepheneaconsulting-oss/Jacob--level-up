@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level Up Volleyball Tracker</title>
+  <style>
+    :root{
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --line:#dbe3ee;
+      --accent:#2563eb;
+      --accent-soft:#dbeafe;
+      --success:#15803d;
+      --warning:#b45309;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding:24px 16px 48px;
+    }
+    .hero{
+      background:linear-gradient(135deg,#1d4ed8,#2563eb,#60a5fa);
+      color:white;
+      border-radius:18px;
+      padding:24px;
+      box-shadow:0 10px 30px rgba(37,99,235,.18);
+      margin-bottom:20px;
+    }
+    .hero h1{
+      margin:0 0 8px;
+      font-size:clamp(28px,4vw,42px);
+    }
+    .hero p{
+      margin:6px 0;
+      max-width:850px;
+      line-height:1.5;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap:20px;
+      align-items:start;
+    }
+    @media (max-width: 900px){
+      .grid{grid-template-columns:1fr}
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+      box-shadow:0 6px 20px rgba(15,23,42,.05);
+    }
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin:16px 0 0;
+    }
+    @media (max-width:700px){
+      .summary{grid-template-columns:1fr}
+    }
+    .stat{
+      background:rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:14px;
+      padding:14px;
+    }
+    .stat .label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      opacity:.85;
+    }
+    .stat .value{
+      font-size:28px;
+      font-weight:700;
+      margin-top:6px;
+    }
+    h2{
+      margin:0 0 12px;
+      font-size:22px;
+    }
+    h3{
+      margin:20px 0 10px;
+      font-size:17px;
+    }
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin:12px 0 18px;
+    }
+    button, .buttonish{
+      border:none;
+      background:var(--accent);
+      color:#fff;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+    }
+    button.secondary{
+      background:#0f172a;
+    }
+    button.light{
+      background:#e5eefc;
+      color:#1e3a8a;
+    }
+    button:hover{filter:brightness(.97)}
+    .days{
+      display:grid;
+      grid-template-columns:repeat(7,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    @media (max-width:900px){
+      .days{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:520px){
+      .days{grid-template-columns:1fr}
+    }
+    .day{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:#fbfdff;
+    }
+    .day h4{
+      margin:0 0 8px;
+      font-size:15px;
+    }
+    .day-total{
+      font-weight:700;
+      color:var(--accent);
+      margin-bottom:8px;
+    }
+    .checklist{
+      max-height:300px;
+      overflow:auto;
+      padding-right:6px;
+      border-top:1px dashed var(--line);
+      margin-top:8px;
+    }
+    .item{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+      padding:7px 0;
+      border-bottom:1px solid #eef2f7;
+    }
+    .item:last-child{border-bottom:none}
+    .item input{margin-top:3px}
+    .item label{
+      display:flex;
+      justify-content:space-between;
+      width:100%;
+      gap:10px;
+      line-height:1.3;
+      font-size:13px;
+    }
+    .item .pts{
+      white-space:nowrap;
+      color:var(--accent);
+      font-weight:700;
+    }
+    .pill-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:10px;
+    }
+    .pill{
+      background:var(--accent-soft);
+      color:#1e3a8a;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .category-box{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px;
+      margin-bottom:10px;
+      background:#fcfdff;
+    }
+    .progress{
+      height:18px;
+      width:100%;
+      background:#e5e7eb;
+      border-radius:999px;
+      overflow:hidden;
+      margin:10px 0 8px;
+    }
+    .progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,#2563eb,#16a34a);
+      transition:width .25s ease;
+    }
+    .goal-text{
+      font-size:14px;
+      font-weight:700;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+      margin-top:10px;
+    }
+    th, td{
+      border-bottom:1px solid var(--line);
+      padding:10px 8px;
+      text-align:left;
+    }
+    th{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      color:var(--muted);
+    }
+    .footer-note{
+      margin-top:18px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .success{color:var(--success)}
+    .warning{color:var(--warning)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Level Up Volleyball Tracker</h1>
+      <p>Use this single-file tracker in GitHub Pages or on any web host. Check off completed activities each day, watch your total climb, and push toward the weekly goal of <strong>500 points</strong>.</p>
+      <p class="small">Everything is saved automatically in your browser with local storage.</p>
+      <div class="summary">
+        <div class="stat">
+          <div class="label">Weekly Total</div>
+          <div class="value" id="weeklyTotal">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">Points Remaining</div>
+          <div class="value" id="pointsRemaining">500</div>
+        </div>
+        <div class="stat">
+          <div class="label">Status</div>
+          <div class="value" id="statusText">Start</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Weekly Tracker</h2>
+        <p class="muted">Select activities on the day they are completed. You can use the same activity on different days. Each day has its own checklist.</p>
+        <div class="controls">
+          <button id="resetWeek">Reset Weekly Tracker</button>
+          <button class="secondary" id="expandAll">Expand All Days</button>
+          <button class="light" id="collapseAll">Collapse All Days</button>
+        </div>
+
+        <div class="progress" aria-label="Weekly progress">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="goal-text" id="goalText">0 / 500 points</div>
+
+        <div class="days" id="daysContainer"></div>
+      </section>
+
+      <aside class="card">
+        <h2>Category Targets</h2>
+        <div id="categorySummary"></div>
+
+        <h3>Recommended Weekly Emphasis</h3>
+        <table>
+          <thead>
+            <tr><th>Category</th><th>Suggested Range</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Volleyball skill work</td><td>130–160</td></tr>
+            <tr><td>Plyometrics</td><td>140–170</td></tr>
+            <tr><td>Strength training</td><td>110–140</td></tr>
+            <tr><td>Conditioning</td><td>40–60</td></tr>
+            <tr><td>Mobility / recovery</td><td>15–30</td></tr>
+          </tbody>
+        </table>
+
+        <div class="pill-row">
+          <span class="pill">Goal: 500 points</span>
+          <span class="pill">Tracks daily choices</span>
+          <span class="pill">Works on GitHub Pages</span>
+        </div>
+
+        <div class="footer-note">
+          Tip: upload this file as <strong>index.html</strong> to a GitHub repository, then enable GitHub Pages. The tracker will work without any other files.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const weeklyGoal = 500;
+    const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+    const activities = [
+      { category: "Volleyball Skill Work", items: [
+        ["Wall Passing Series (10 minutes)",15],
+        ["Wall Setting Series (10 minutes)",15],
+        ["Serving Reps (30–40 quality serves)",20],
+        ["Approach Footwork Practice (10 minutes)",10],
+        ["Arm Swing Mechanics / Hit-to-Wall Work (10 minutes)",15],
+        ["Defensive Movement Series (10 minutes)",15],
+        ["Serve Receive Footwork Drill (10 minutes)",15],
+        ["Pepper with Partner (15 minutes)",20],
+        ["Short Court Ball Control (10–15 minutes)",15],
+        ["Target Serving Challenge",20]
+      ]},
+      { category: "Plyometrics", items: [
+        ["Squat Jumps — 4 x 15",15],
+        ["Tuck Jumps — 4 x 12",15],
+        ["Lateral Bounds — 4 x 10 each side",15],
+        ["Broad Jumps — 4 x 8",15],
+        ["Split Squat Jumps — 4 x 10 each leg",15],
+        ["Single-Leg Hops — 4 x 8 each leg",15],
+        ["Skater Jumps — 4 x 16 total",15],
+        ["Pogo Jumps — 4 x 25 seconds",10],
+        ["Line Hops (front/back and lateral) — 4 rounds",10],
+        ["Jump-to-Stick Landings — 4 x 8",10],
+        ["Block Jump Repeats — 4 x 10",15],
+        ["Approach Jump Repeats — 4 x 8",15]
+      ]},
+      { category: "Strength Training", items: [
+        ["Bodyweight Squats — 4 x 25",15],
+        ["Jump Squats — 4 x 15",15],
+        ["Reverse Lunges — 4 x 15 each leg",15],
+        ["Walking Lunges — 3 x 20 each leg",15],
+        ["Bulgarian Split Squats — 4 x 12 each leg",20],
+        ["Single-Leg Wall Sit — 3 x 45 sec each leg",15],
+        ["Glute Bridges — 4 x 25",10],
+        ["Single-Leg Glute Bridges — 3 x 15 each leg",15],
+        ["Push-Ups — 4 x 20–25",15],
+        ["Close-Grip Push-Ups — 3 x 15–20",15],
+        ["Decline Push-Ups — 4 x 12–15",20],
+        ["Pike Push-Ups — 4 x 10–15",15],
+        ["Push-Up Hold + Reps Combo",15],
+        ["Front Plank — 3 x 60 sec",10],
+        ["Side Plank — 3 x 45 sec each side",10],
+        ["V-Ups — 4 x 20",15],
+        ["Bicycle Crunches — 4 x 30 total",10],
+        ["Mountain Climbers — 4 x 40 sec",10],
+        ["Leg Raises — 4 x 15–20",15],
+        ["Hollow Hold — 3 x 30–45 sec",10],
+        ["Bear Crawls — 5 x 20 yards",15],
+        ["Burpees — 4 x 15",15]
+      ]},
+      { category: "Conditioning", items: [
+        ["Sprint Intervals (10 x 15–20 yards)",15],
+        ["Shuffle Intervals (6 rounds)",10],
+        ["Court Movement Conditioning (8–10 min)",15],
+        ["Jump Rope (5–7 min)",10],
+        ["Tempo Run / Fast Continuous Movement (15–20 min)",15],
+        ["Stair Runs / Step-Ups",15]
+      ]},
+      { category: "Mobility / Recovery", items: [
+        ["Hip Mobility Routine",5],
+        ["Ankle Mobility Routine",5],
+        ["Shoulder Mobility Routine",5],
+        ["Full Body Stretch",5],
+        ["Foam Roll / Recovery Session",5]
+      ]}
+    ];
+
+    const storageKey = "level-up-volleyball-tracker-v1";
+
+    function buildTracker() {
+      const container = document.getElementById("daysContainer");
+      container.innerHTML = "";
+
+      days.forEach((day, dayIndex) => {
+        const details = document.createElement("details");
+        details.className = "day";
+        details.open = dayIndex < 2;
+
+        const summary = document.createElement("summary");
+        summary.innerHTML = `<h4 style="display:inline">${day}</h4>`;
+        details.appendChild(summary);
+
+        const total = document.createElement("div");
+        total.className = "day-total";
+        total.id = `day-total-${dayIndex}`;
+        total.textContent = "0 points";
+        details.appendChild(total);
+
+        const checklist = document.createElement("div");
+        checklist.className = "checklist";
+
+        activities.forEach((group, groupIndex) => {
+          const box = document.createElement("div");
+          box.className = "category-box";
+          const heading = document.createElement("div");
+          heading.innerHTML = `<strong>${group.category}</strong>`;
+          box.appendChild(heading);
+
+          group.items.forEach((item, itemIndex) => {
+            const [name, pts] = item;
+            const row = document.createElement("div");
+            row.className = "item";
+
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.id = `d${dayIndex}-g${groupIndex}-i${itemIndex}`;
+            input.dataset.day = dayIndex;
+            input.dataset.category = group.category;
+            input.dataset.points = pts;
+            input.addEventListener("change", saveAndRender);
+
+            const label = document.createElement("label");
+            label.setAttribute("for", input.id);
+            label.innerHTML = `<span>${name}</span><span class="pts">${pts} pts</span>`;
+
+            row.appendChild(input);
+            row.appendChild(label);
+            box.appendChild(row);
+          });
+
+          checklist.appendChild(box);
+        });
+
+        details.appendChild(checklist);
+        container.appendChild(details);
+      });
+
+      loadState();
+      render();
+    }
+
+    function getState() {
+      const state = {};
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        state[cb.id] = cb.checked;
+      });
+      return state;
+    }
+
+    function saveAndRender() {
+      localStorage.setItem(storageKey, JSON.stringify(getState()));
+      render();
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return;
+      try {
+        const state = JSON.parse(saved);
+        Object.entries(state).forEach(([id, checked]) => {
+          const el = document.getElementById(id);
+          if (el) el.checked = checked;
+        });
+      } catch (e) {
+        console.error("Could not load saved tracker data.", e);
+      }
+    }
+
+    function render() {
+      let weeklyTotal = 0;
+      const categoryTotals = {};
+      const dayTotals = new Array(days.length).fill(0);
+
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.checked) {
+          const pts = Number(cb.dataset.points || 0);
+          const day = Number(cb.dataset.day);
+          const cat = cb.dataset.category;
+
+          weeklyTotal += pts;
+          dayTotals[day] += pts;
+          categoryTotals[cat] = (categoryTotals[cat] || 0) + pts;
+        }
+      });
+
+      dayTotals.forEach((total, i) => {
+        const el = document.getElementById(`day-total-${i}`);
+        if (el) el.textContent = `${total} points`;
+      });
+
+      document.getElementById("weeklyTotal").textContent = weeklyTotal;
+      document.getElementById("pointsRemaining").textContent = Math.max(weeklyGoal - weeklyTotal, 0);
+      document.getElementById("goalText").textContent = `${weeklyTotal} / ${weeklyGoal} points`;
+      document.getElementById("progressBar").style.width = `${Math.min((weeklyTotal / weeklyGoal) * 100, 100)}%`;
+
+      const status = document.getElementById("statusText");
+      if (weeklyTotal >= weeklyGoal) {
+        status.textContent = "Goal Hit";
+      } else if (weeklyTotal >= 350) {
+        status.textContent = "Strong Week";
+      } else if (weeklyTotal >= 200) {
+        status.textContent = "Building";
+      } else {
+        status.textContent = "Start";
+      }
+
+      const categoryBox = document.getElementById("categorySummary");
+      categoryBox.innerHTML = "";
+      activities.forEach(group => {
+        const val = categoryTotals[group.category] || 0;
+        const div = document.createElement("div");
+        div.className = "category-box";
+        const statusClass = val === 0 ? "warning" : "success";
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+            <strong>${group.category}</strong>
+            <span class="${statusClass}"><strong>${val} pts</strong></span>
+          </div>
+        `;
+        categoryBox.appendChild(div);
+      });
+    }
+
+    document.getElementById("resetWeek").addEventListener("click", () => {
+      if (confirm("Reset the full weekly tracker?")) {
+        localStorage.removeItem(storageKey);
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        render();
+      }
+    });
+
+    document.getElementById("expandAll").addEventListener("click", () => {
+      document.querySelectorAll(".day").forEach(d => d.open = true);
+    });
+
+    document.getElementById("collapseAll").addEventListener("click", () => {
+      document.querySelectorAll(".day").forEach(d => d.open = false);
+    });
+
+    buildTracker();
+  </script>
+</body>
+</html>
